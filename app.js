@@ -8,14 +8,14 @@ var multer = require('multer');
 var db;
 var env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
-  // mongoose connect for heroku
   db = require('monk')(process.env.MONGOLAB_URI);
 } else {
   db = require('monk')('localhost/nodeblog');
 }
 
-
 var app = express();
+app.locals.moment = require('moment');
+
 
 var routes = require('./routes/index');
 
