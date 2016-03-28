@@ -18,6 +18,7 @@ app.locals.moment = require('moment');
 
 
 var routes = require('./routes/index');
+var posts = require('./routes/posts');
 
 
 app.set('port', (process.env.PORT || 3000));
@@ -73,6 +74,7 @@ app.use(function(req,res,next){
 });
 
 app.use('/', routes);
+app.use('/posts', posts);
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
