@@ -29,10 +29,10 @@ router.post('/add', upload.single('mainimage'), function(req, res, next){
 	var author = req.body.author;
 	var date = new Date();
 
-	if (req.files.mainimage) {
-		var mainImageOriginalName = req.file.mainimage.originalname;
+	if (req.file) {
+		var mainimage = req.file.mainimage;
 	} else{
-		var mainImageName = 'noimage.png';
+		var mainimage = 'noimage.png';
 	}
 
 	//form validation
@@ -56,7 +56,7 @@ router.post('/add', upload.single('mainimage'), function(req, res, next){
 			"category": category,
 			"date": date,
 			"author": author,
-			"mainimage": mainImageName 
+			"mainimage": mainimage
 		}, function(err, post) {
 			if(err){
 				res.send(err);
