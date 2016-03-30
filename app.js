@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var flash = require('connect-flash');
 var mongo = require('mongodb');
 var multer = require('multer');
+var upload = multer({ dest: 'uploads/' })
 var db;
 var env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -19,6 +20,7 @@ app.locals.moment = require('moment');
 
 var routes = require('./routes/index');
 var posts = require('./routes/posts');
+var categories = require('./routes/categories');
 
 
 app.set('port', (process.env.PORT || 3000));
@@ -29,11 +31,14 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
-// Handle File Uploads & Multipart Data
-app.use(multer({ dest: './public/images/uploads'}));
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// make db accessible to router
+app.use(function(req, res, next){
+  req.db = db;
+  next();
+});
 
 // Express Session
 app.use(session({
@@ -75,6 +80,7 @@ app.use(function(req,res,next){
 
 app.use('/', routes);
 app.use('/posts', posts);
+app.use('/categories', categories);
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));

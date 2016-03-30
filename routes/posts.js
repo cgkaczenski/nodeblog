@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var multer = require('multer');
+var upload = multer({ dest: './public/images' })
 var mongo = require('mongodb');
 var db;
 var env = process.env.NODE_ENV || 'development';
@@ -9,19 +11,18 @@ if (env === 'production') {
   db = require('monk')('localhost/nodeblog');
 }
 
-// Homepage Blog Post
 router.get('/add', function(req, res, next) {
 	var categories = db.get('categories');
 
 	categories.find({}, {}, function(err, categories){
 		res.render('addpost', {
-			"title": "Add Post",
+			'title': 'Add Post',
 			"categories": categories
 		});
 	});
 });
 
-router.post('/add', function(req, res, next){
+router.post('/add', upload.single('mainimage'), function(req, res, next){
 	var title = req.body.title;
 	var category = req.body.category;
 	var body = req.body.body;
@@ -29,12 +30,7 @@ router.post('/add', function(req, res, next){
 	var date = new Date();
 
 	if (req.files.mainimage) {
-		var mainImageOriginalName = req.files.mainimage.originalname;
-		var mainImageName = req.files.mainimage.name;
-		var mainImageMime = req.files.mainimage.mimetype;
-		var mainImagePath = req.files.mainimage.path;
-		var mainImageExt  = req.files.mainimage.extension;
-		var mainImageSize = req.files.mainimage.size;
+		var mainImageOriginalName = req.file.mainimage.originalname;
 	} else{
 		var mainImageName = 'noimage.png';
 	}
@@ -54,7 +50,6 @@ router.post('/add', function(req, res, next){
 	} else {
 		var posts = db.get('posts');
 
-
 		posts.insert({
 			"title": title,
 			"body": body,
@@ -64,7 +59,7 @@ router.post('/add', function(req, res, next){
 			"mainimage": mainImageName 
 		}, function(err, post) {
 			if(err){
-				res.send('Error sending post');
+				res.send(err);
 			} else{
 				req.flash('success', 'Post Submitted');
 				res.location('/');
