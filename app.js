@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var flash = require('connect-flash');
 var mongo = require('mongodb');
 var multer = require('multer');
-var upload = multer({ dest: 'uploads/' })
+var upload = multer({ dest: './public/images/uploads' })
 var db;
 var env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -15,7 +15,11 @@ if (env === 'production') {
 }
 
 var app = express();
+
 app.locals.moment = require('moment');
+app.locals.truncatedText = function(text, length) {
+  return text.substring(0, length);
+}
 
 
 var routes = require('./routes/index');

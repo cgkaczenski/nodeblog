@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
-var upload = multer({ dest: './public/images' })
+var upload = multer({ dest: './public/images/uploads' })
 var mongo = require('mongodb');
 var db;
 var env = process.env.NODE_ENV || 'development';
@@ -17,7 +17,7 @@ router.get('/add', function(req, res, next) {
 	categories.find({}, {}, function(err, categories){
 		res.render('addpost', {
 			'title': 'Add Post',
-			"categories": categories
+			'categories': categories
 		});
 	});
 });
@@ -30,7 +30,7 @@ router.post('/add', upload.single('mainimage'), function(req, res, next){
 	var date = new Date();
 
 	if (req.file) {
-		var mainimage = req.file.mainimage;
+		var mainimage = req.file.filename;
 	} else{
 		var mainimage = 'noimage.png';
 	}
