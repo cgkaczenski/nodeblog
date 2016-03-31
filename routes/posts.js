@@ -11,6 +11,16 @@ if (env === 'production') {
   db = require('monk')('localhost/nodeblog');
 }
 
+router.get('/show/:id', function(req, res, next) {
+	var posts = db.get('posts');
+
+	posts.findById(req.params.id, function(err, post){
+		res.render('show', {
+			'post': post
+		});
+	});
+});
+
 router.get('/add', function(req, res, next) {
 	var categories = db.get('categories');
 
@@ -37,7 +47,7 @@ router.post('/add', upload.single('mainimage'), function(req, res, next){
 
 	//form validation
 	req.checkBody('title', 'Title field is required').notEmpty();
-	req.checkBody('body', 'Body field is required');
+	req.checkBody('body', 'Body field is required').notEmpty();
 
 	var errors = req.validationErrors();
 
@@ -65,6 +75,56 @@ router.post('/add', upload.single('mainimage'), function(req, res, next){
 				res.location('/');
 				res.redirect('/');
 			}
+		});
+	}
+});
+
+router.post('/addcomment', function(req, res, next){
+	var name = req.body.name;
+	var email = req.body.email;
+	var body = req.body.body;
+	var postid = req.body.postid;
+	var commentDate = new Date();
+
+	req.checkBody('name', 'Name is required').notEmpty();
+	req.checkBody('email', 'Email field is required but not diplayed').notEmpty();
+	req.checkBody('email', 'Email not correctly formatted').isEmail();
+	req.checkBody('body', 'Comment is required').notEmpty();
+
+	var errors = req.validationErrors();
+
+	if (errors){
+		var posts = db.get('posts');
+		posts.findById(postid, function(err, post){
+			res.render('show', {
+				"errors" : errors,
+				"post" : post
+			});
+		});
+
+	} else {
+		var comment = {
+			"name": name,
+			"email": email,
+			"body": body,
+			"commentDate": commentDate
+		}
+
+		var posts = db.get('posts');
+		posts.update({
+			"_id": postid
+			}, {
+				$push: {
+					"comments": comment
+				}
+			}, function(err, doc){
+				if(err){
+					throw err;
+				}else {
+					req.flash('success', 'Comment Added');
+					res.location('/posts/show/' + postid);
+					res.redirect('/posts/show/' + postid);
+				}
 		});
 	}
 });
